@@ -3,11 +3,17 @@ import sys
 
 from util import Node, StackFrontier, QueueFrontier
 
+# Maps names to a set of corresponding person_ids
+names = {}
+
+# Maps person_ids to a dictionary of: name, birth, movies (a set of movie_ids)
+people = {}
+
+# Maps movie_ids to a dictionary of: title, year, stars (a set of person_ids)
+movies = {}
+
 
 def load_data(directory):
-    names = {}
-    people = {}
-    movies = {}
     """
     Load data from CSV files into memory.
     """
@@ -86,8 +92,33 @@ def shortest_path(source, target):
     If no possible path, returns None.
     """
 
-    # TODO
-    raise NotImplementedError
+    num_explored = 0
+    start = Node(state = source, parent = None, action = None)
+    frontier = QueueFrontier()
+    frontier.add(start)
+
+    explored = set()
+    while True:
+        if frontier.empty():
+            return None
+        
+        node = frontier.remove()
+        num_explored += 1
+    
+        if node.state == target:
+            sol_list = []
+            while node.parent is not None:
+                sol_list.append((node.action,node.state))
+                node = node.parent
+            sol_list.reverse()
+            return sol_list
+
+        explored.add(node.state)
+    
+        for action, state in neighbors_for_person(node.state):
+            if not frontier.contains_state(state) and state not in explored:
+                child = Node(state=state, parent=node, action=action)
+                frontier.add(child)
 
 
 def person_id_for_name(name):
@@ -129,4 +160,5 @@ def neighbors_for_person(person_id):
     return neighbors
 
 
-
+if __name__ == "__main__":
+    main()
